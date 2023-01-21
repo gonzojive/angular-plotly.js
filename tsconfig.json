@@ -2,6 +2,7 @@
     "compileOnSave": false,
     "angularCompilerOptions": {
       "enableIvy": true,
+      "compilationMode": "partial",
       "allowEmptyCodegenFiles": true
     },
     "compilerOptions": {
