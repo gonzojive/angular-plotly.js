@@ -34,7 +34,7 @@ import * as PlotlyJS from 'plotly.js';
 export class PlotlyComponent implements OnInit, OnChanges, OnDestroy, DoCheck {
     protected defaultClassName = 'js-plotly-plot';
 
-    public plotlyInstance: Plotly.PlotlyHTMLElement;
+    public plotlyInstance: PlotlyJS.PlotlyHTMLElement;
     public resizeHandler?: (instance: Plotly.PlotlyHTMLElement) => void;
     public layoutDiffer: KeyValueDiffer<string, any>;
     public dataDiffer: IterableDiffer<Plotly.Data>;
@@ -62,44 +62,74 @@ export class PlotlyComponent implements OnInit, OnChanges, OnDestroy, DoCheck {
     @Output() purge = new EventEmitter<Plotly.Figure>();
     @Output() error = new EventEmitter<Error>();
 
-    @Output() afterExport = new EventEmitter();
-    @Output() afterPlot = new EventEmitter();
-    @Output() animated = new EventEmitter();
-    @Output() animatingFrame = new EventEmitter();
-    @Output() animationInterrupted = new EventEmitter();
-    @Output() autoSize = new EventEmitter();
-    @Output() beforeExport = new EventEmitter();
-    @Output() buttonClicked = new EventEmitter();
-    @Output() click = new EventEmitter();
-    @Output() plotlyClick = new EventEmitter();
-    @Output() clickAnnotation = new EventEmitter();
-    @Output() deselect = new EventEmitter();
-    @Output() doubleClick = new EventEmitter();
-    @Output() framework = new EventEmitter();
+    @Output() afterExport = new EventEmitter<void>();
+    @Output() afterPlot = new EventEmitter<void>();
+    @Output() animated = new EventEmitter<void>();
+    @Output() animatingFrame = new EventEmitter<PlotlyJS.FrameAnimationEvent>();
+    @Output() animationInterrupted = new EventEmitter<void>();
+    @Output() autoSize = new EventEmitter<void>();
+    @Output() beforeExport = new EventEmitter<PlotlyJS.BeforePlotEvent>();
+    @Output() click = new EventEmitter<PlotlyJS.PlotMouseEvent>();
+    @Output() plotlyClick = new EventEmitter<PlotlyJS.PlotMouseEvent>();
+    @Output() clickAnnotation = new EventEmitter<PlotlyJS.ClickAnnotationEvent>();
+    @Output() deselect = new EventEmitter<void>();
+    @Output() doubleClick = new EventEmitter<void>();
+    @Output() framework = new EventEmitter<void>();
     @Output() hover = new EventEmitter<PlotlyJS.PlotHoverEvent>();
-    @Output() legendClick = new EventEmitter();
-    @Output() legendDoubleClick = new EventEmitter();
-    @Output() react = new EventEmitter();
-    @Output() relayout = new EventEmitter();
-    @Output() restyle = new EventEmitter();
-    @Output() redraw = new EventEmitter();
-    @Output() selected = new EventEmitter();
-    @Output() selecting = new EventEmitter();
-    @Output() sliderChange = new EventEmitter();
-    @Output() sliderEnd = new EventEmitter();
-    @Output() sliderStart = new EventEmitter();
-    @Output() transitioning = new EventEmitter();
-    @Output() transitionInterrupted = new EventEmitter();
-    @Output() unhover = new EventEmitter();
-    @Output() relayouting = new EventEmitter();
-    @Output() treemapclick = new EventEmitter();
-    @Output() sunburstclick = new EventEmitter();
+    @Output() legendClick = new EventEmitter<PlotlyJS.LegendClickEvent>();
+    @Output() legendDoubleClick = new EventEmitter<PlotlyJS.LegendClickEvent>();
+    @Output() relayout = new EventEmitter<PlotlyJS.PlotRelayoutEvent>();
+    @Output() restyle = new EventEmitter<PlotlyJS.PlotRestyleEvent>();
+    @Output() redraw = new EventEmitter<void>();
+    @Output() selected = new EventEmitter<PlotlyJS.PlotSelectionEvent>();
+    @Output() selecting = new EventEmitter<PlotlyJS.PlotSelectionEvent>();
+    @Output() sliderChange = new EventEmitter<PlotlyJS.SliderChangeEvent>();
+    @Output() sliderEnd = new EventEmitter<PlotlyJS.SliderEndEvent>();
+    @Output() sliderStart = new EventEmitter<PlotlyJS.SliderStartEvent>();
+    @Output() transitioning = new EventEmitter<void>();
+    @Output() transitionInterrupted = new EventEmitter<void>();
+    @Output() unhover = new EventEmitter<PlotlyJS.PlotMouseEvent>();
+    @Output() relayouting = new EventEmitter<PlotlyJS.PlotRelayoutEvent>();
 
-    public eventNames = ['afterExport', 'afterPlot', 'animated', 'animatingFrame', 'animationInterrupted', 'autoSize',
-        'beforeExport', 'buttonClicked', 'clickAnnotation', 'deselect', 'doubleClick', 'framework', 'hover',
-        'legendClick', 'legendDoubleClick', 'react', 'relayout', 'restyle', 'redraw', 'selected', 'selecting', 'sliderChange',
-        'sliderEnd', 'sliderStart', 'transitioning', 'transitionInterrupted', 'unhover', 'relayouting', 'treemapclick',
-        'sunburstclick'];
+    // Not part of @types/plotly.js.
+    // @Output() buttonClicked = new EventEmitter<unknown>();
+    // @Output() react = new EventEmitter<PlotlyJS.Rea>();
+    // @Output() treemapclick = new EventEmitter<PlotlyJS.PlotTreemapclickEvent>();
+    // @Output() sunburstclick = new EventEmitter<PlotlyJS.PlotSunburstclickEvent>();
+
+    public eventNames = [
+        'afterExport',
+        'afterPlot',
+        'animated',
+        'animatingFrame',
+        'animationInterrupted',
+        'autoSize',
+        'beforeExport',
+        'clickAnnotation',
+        'deselect',
+        'doubleClick',
+        'framework',
+        'hover',
+        'legendClick',
+        'legendDoubleClick',
+        'redraw',
+        'relayout',
+        'relayouting',
+        'restyle',
+        'selected',
+        'selecting',
+        'sliderChange',
+        'sliderEnd',
+        'sliderStart',
+        'transitioning',
+        'transitionInterrupted',
+        'unhover',
+        // Not part of @types/plotly.js.
+        //'buttonClicked',
+        //'react',
+        //'sunburstclick',
+        //'treemapclick',
+    ];
     
     private typesafeEventNames = new Set(['hover']);
 
@@ -208,18 +238,38 @@ export class PlotlyComponent implements OnInit, OnChanges, OnDestroy, DoCheck {
     }
 
     createPlot(): Promise<void> {
-        return this.plotly.newPlot(this.plotEl.nativeElement, this.data, this.layout, this.config, this.frames).then(plotlyInstance => {
+        return this.plotly.newPlot(this.plotEl.nativeElement, this.data, this.layout, this.config, this.frames).then((plotlyInstance: PlotlyJS.PlotlyHTMLElement) => {
             this.plotlyInstance = plotlyInstance;
             this.getWindow().gd = this.debug ? plotlyInstance : undefined;
 
-            this.eventNames.forEach(name => {
-                if (this.typesafeEventNames.has(name)) {
-                    return;
-                }
-                const eventName = `plotly_${name.toLowerCase()}`;
-                plotlyInstance.on(eventName, (data: any) => (this[name] as EventEmitter<void>).emit(data));
-            });
+            plotlyInstance.on('plotly_afterexport', () => this.afterExport.emit());
+            plotlyInstance.on('plotly_afterplot', () => this.afterPlot.emit());
+            plotlyInstance.on('plotly_animated', () => this.animated.emit());
+            plotlyInstance.on('plotly_animationinterrupted', () => this.animationInterrupted.emit());
+            plotlyInstance.on('plotly_autosize', () => this.autoSize.emit());
+            plotlyInstance.on('plotly_beforeexport', () => this.beforeExport.emit());
+            plotlyInstance.on('plotly_deselect', () => this.deselect.emit());
+            plotlyInstance.on('plotly_doubleclick', () => this.doubleClick.emit());
+            plotlyInstance.on('plotly_framework', () => this.framework.emit());
+            plotlyInstance.on('plotly_redraw', () => this.redraw.emit());
+            plotlyInstance.on('plotly_transitioning', () => this.transitioning.emit());
+            plotlyInstance.on('plotly_transitioninterrupted', () => this.transitionInterrupted.emit());
+
             plotlyInstance.on('plotly_hover', event => this.hover.emit(event));
+            plotlyInstance.on('plotly_animatingframe', event => this.animatingFrame.emit(event));
+            plotlyInstance.on('plotly_clickannotation', event => this.clickAnnotation.emit(event));
+            plotlyInstance.on('plotly_hover', event => this.hover.emit(event));
+            plotlyInstance.on('plotly_legendclick', event => { this.legendClick.emit(event); return false });
+            plotlyInstance.on('plotly_legendclick', event => { this.legendDoubleClick.emit(event); return false });
+            plotlyInstance.on('plotly_relayout', event => this.relayout.emit(event));
+            plotlyInstance.on('plotly_relayouting', event => this.relayouting.emit(event));
+            plotlyInstance.on('plotly_restyle', event => this.restyle.emit(event));
+            plotlyInstance.on('plotly_selected', event => this.selected.emit(event));
+            plotlyInstance.on('plotly_selecting', event => this.selecting.emit(event));
+            plotlyInstance.on('plotly_sliderchange', event => this.sliderChange.emit(event));
+            plotlyInstance.on('plotly_sliderend', event => this.sliderEnd.emit(event));
+            plotlyInstance.on('plotly_sliderstart', event => this.sliderStart.emit(event));
+            plotlyInstance.on('plotly_unhover', event => this.unhover.emit(event));
 
 
             plotlyInstance.on('plotly_click', (data: any) => {
