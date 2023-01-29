@@ -1,5 +1,9 @@
+// import * as _Plotly from 'plotly.js-dist-min';
+
+// export const Plotly = _Plotly;
 
 /* tslint:disable no-namespace ban-types */
+
 export namespace Plotly {
     export type Data = any;
     export type Layout = any;

@@ -21,6 +21,7 @@ import {
 
 import { PlotlyService } from './plotly.service';
 import { Plotly } from './plotly.interface';
+import * as PlotlyJS from 'plotly.js';
 
 // @dynamic
 @Component({
@@ -75,7 +76,7 @@ export class PlotlyComponent implements OnInit, OnChanges, OnDestroy, DoCheck {
     @Output() deselect = new EventEmitter();
     @Output() doubleClick = new EventEmitter();
     @Output() framework = new EventEmitter();
-    @Output() hover = new EventEmitter();
+    @Output() hover = new EventEmitter<PlotlyJS.PlotHoverEvent>();
     @Output() legendClick = new EventEmitter();
     @Output() legendDoubleClick = new EventEmitter();
     @Output() react = new EventEmitter();
@@ -99,6 +100,8 @@ export class PlotlyComponent implements OnInit, OnChanges, OnDestroy, DoCheck {
         'legendClick', 'legendDoubleClick', 'react', 'relayout', 'restyle', 'redraw', 'selected', 'selecting', 'sliderChange',
         'sliderEnd', 'sliderStart', 'transitioning', 'transitionInterrupted', 'unhover', 'relayouting', 'treemapclick',
         'sunburstclick'];
+    
+    private typesafeEventNames = new Set(['hover']);
 
     constructor(
         public plotly: PlotlyService,
@@ -210,9 +213,14 @@ export class PlotlyComponent implements OnInit, OnChanges, OnDestroy, DoCheck {
             this.getWindow().gd = this.debug ? plotlyInstance : undefined;
 
             this.eventNames.forEach(name => {
+                if (this.typesafeEventNames.has(name)) {
+                    return;
+                }
                 const eventName = `plotly_${name.toLowerCase()}`;
                 plotlyInstance.on(eventName, (data: any) => (this[name] as EventEmitter<void>).emit(data));
             });
+            plotlyInstance.on('plotly_hover', event => this.hover.emit(event));
+
 
             plotlyInstance.on('plotly_click', (data: any) => {
                 this.click.emit(data);
