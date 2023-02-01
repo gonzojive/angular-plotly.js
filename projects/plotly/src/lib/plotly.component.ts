@@ -20,8 +20,7 @@ import {
 } from '@angular/core';
 
 import { PlotlyService } from './plotly.service';
-import { Plotly } from './plotly.interface';
-import * as PlotlyJS from 'plotly.js';
+import { Plotly, Figure } from './plotly.interface';
 
 // @dynamic
 @Component({
@@ -34,7 +33,7 @@ import * as PlotlyJS from 'plotly.js';
 export class PlotlyComponent implements OnInit, OnChanges, OnDestroy, DoCheck {
     protected defaultClassName = 'js-plotly-plot';
 
-    public plotlyInstance: PlotlyJS.PlotlyHTMLElement;
+    public plotlyInstance: Plotly.PlotlyHTMLElement;
     public resizeHandler?: (instance: Plotly.PlotlyHTMLElement) => void;
     public layoutDiffer: KeyValueDiffer<string, any>;
     public dataDiffer: IterableDiffer<Plotly.Data>;
@@ -57,45 +56,45 @@ export class PlotlyComponent implements OnInit, OnChanges, OnDestroy, DoCheck {
     @Input() updateOnDataChange = true;
     @Input() updateOnlyWithRevision = false;
 
-    @Output() initialized = new EventEmitter<Plotly.Figure>();
-    @Output() update = new EventEmitter<Plotly.Figure>();
-    @Output() purge = new EventEmitter<Plotly.Figure>();
+    @Output() initialized = new EventEmitter<Figure>();
+    @Output() update = new EventEmitter<Figure>();
+    @Output() purge = new EventEmitter<Figure>();
     @Output() error = new EventEmitter<Error>();
 
     @Output() afterExport = new EventEmitter<void>();
     @Output() afterPlot = new EventEmitter<void>();
     @Output() animated = new EventEmitter<void>();
-    @Output() animatingFrame = new EventEmitter<PlotlyJS.FrameAnimationEvent>();
+    @Output() animatingFrame = new EventEmitter<Plotly.FrameAnimationEvent>();
     @Output() animationInterrupted = new EventEmitter<void>();
     @Output() autoSize = new EventEmitter<void>();
-    @Output() beforeExport = new EventEmitter<PlotlyJS.BeforePlotEvent>();
-    @Output() click = new EventEmitter<PlotlyJS.PlotMouseEvent>();
-    @Output() plotlyClick = new EventEmitter<PlotlyJS.PlotMouseEvent>();
-    @Output() clickAnnotation = new EventEmitter<PlotlyJS.ClickAnnotationEvent>();
+    @Output() beforeExport = new EventEmitter<Plotly.BeforePlotEvent>();
+    @Output() click = new EventEmitter<Plotly.PlotMouseEvent>();
+    @Output() plotlyClick = new EventEmitter<Plotly.PlotMouseEvent>();
+    @Output() clickAnnotation = new EventEmitter<Plotly.ClickAnnotationEvent>();
     @Output() deselect = new EventEmitter<void>();
     @Output() doubleClick = new EventEmitter<void>();
     @Output() framework = new EventEmitter<void>();
-    @Output() hover = new EventEmitter<PlotlyJS.PlotHoverEvent>();
-    @Output() legendClick = new EventEmitter<PlotlyJS.LegendClickEvent>();
-    @Output() legendDoubleClick = new EventEmitter<PlotlyJS.LegendClickEvent>();
-    @Output() relayout = new EventEmitter<PlotlyJS.PlotRelayoutEvent>();
-    @Output() restyle = new EventEmitter<PlotlyJS.PlotRestyleEvent>();
+    @Output() hover = new EventEmitter<Plotly.PlotHoverEvent>();
+    @Output() legendClick = new EventEmitter<Plotly.LegendClickEvent>();
+    @Output() legendDoubleClick = new EventEmitter<Plotly.LegendClickEvent>();
+    @Output() relayout = new EventEmitter<Plotly.PlotRelayoutEvent>();
+    @Output() restyle = new EventEmitter<Plotly.PlotRestyleEvent>();
     @Output() redraw = new EventEmitter<void>();
-    @Output() selected = new EventEmitter<PlotlyJS.PlotSelectionEvent>();
-    @Output() selecting = new EventEmitter<PlotlyJS.PlotSelectionEvent>();
-    @Output() sliderChange = new EventEmitter<PlotlyJS.SliderChangeEvent>();
-    @Output() sliderEnd = new EventEmitter<PlotlyJS.SliderEndEvent>();
-    @Output() sliderStart = new EventEmitter<PlotlyJS.SliderStartEvent>();
+    @Output() selected = new EventEmitter<Plotly.PlotSelectionEvent>();
+    @Output() selecting = new EventEmitter<Plotly.PlotSelectionEvent>();
+    @Output() sliderChange = new EventEmitter<Plotly.SliderChangeEvent>();
+    @Output() sliderEnd = new EventEmitter<Plotly.SliderEndEvent>();
+    @Output() sliderStart = new EventEmitter<Plotly.SliderStartEvent>();
     @Output() transitioning = new EventEmitter<void>();
     @Output() transitionInterrupted = new EventEmitter<void>();
-    @Output() unhover = new EventEmitter<PlotlyJS.PlotMouseEvent>();
-    @Output() relayouting = new EventEmitter<PlotlyJS.PlotRelayoutEvent>();
+    @Output() unhover = new EventEmitter<Plotly.PlotMouseEvent>();
+    @Output() relayouting = new EventEmitter<Plotly.PlotRelayoutEvent>();
 
     // Not part of @types/plotly.js.
     // @Output() buttonClicked = new EventEmitter<unknown>();
-    // @Output() react = new EventEmitter<PlotlyJS.Rea>();
-    // @Output() treemapclick = new EventEmitter<PlotlyJS.PlotTreemapclickEvent>();
-    // @Output() sunburstclick = new EventEmitter<PlotlyJS.PlotSunburstclickEvent>();
+    // @Output() react = new EventEmitter<Plotly.Rea>();
+    // @Output() treemapclick = new EventEmitter<Plotly.PlotTreemapclickEvent>();
+    // @Output() sunburstclick = new EventEmitter<Plotly.PlotSunburstclickEvent>();
 
     public eventNames = [
         'afterExport',
@@ -238,7 +237,7 @@ export class PlotlyComponent implements OnInit, OnChanges, OnDestroy, DoCheck {
     }
 
     createPlot(): Promise<void> {
-        return this.plotly.newPlot(this.plotEl.nativeElement, this.data, this.layout, this.config, this.frames).then((plotlyInstance: PlotlyJS.PlotlyHTMLElement) => {
+        return this.plotly.newPlot(this.plotEl.nativeElement, this.data, this.layout, this.config, this.frames).then((plotlyInstance: Plotly.PlotlyHTMLElement) => {
             this.plotlyInstance = plotlyInstance;
             this.getWindow().gd = this.debug ? plotlyInstance : undefined;
 
@@ -284,9 +283,9 @@ export class PlotlyComponent implements OnInit, OnChanges, OnDestroy, DoCheck {
         });
     }
 
-    createFigure(): Plotly.Figure {
+    createFigure(): Figure {
         const p: any = this.plotlyInstance;
-        const figure: Plotly.Figure = {
+        const figure: Figure = {
             data: p.data,
             layout: p.layout,
             frames: p._transitionData ? p._transitionData._frames : null

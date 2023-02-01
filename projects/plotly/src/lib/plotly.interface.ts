@@ -1,31 +1,15 @@
-// import * as _Plotly from 'plotly.js-dist-min';
+import * as _Plotly from 'plotly.js-dist-min';
 
-// export const Plotly = _Plotly;
+// Without the "export type Plotly = typeof _Plotly;", the TypeScript compiler
+// seems to complain.
 
-/* tslint:disable no-namespace ban-types */
+export type Plotly = typeof _Plotly;
+//export const Plotly = _Plotly;
 
-export namespace Plotly {
-    export type Data = any;
-    export type Layout = any;
-    export type Config = any;
+export type PlotlyInstance = typeof _Plotly;
 
-    export interface Figure {
-        data: Data[];
-        layout: Partial<Layout>;
-        frames: Partial<Config>;
-    }
-
-    export interface PlotlyHTMLElement extends HTMLElement {
-        on(event: string, callback: Function): void;
-        removeListener(event: string, callback: Function): void;
-    }
-
-    export interface PlotlyInstance {
-        // tslint:disable max-line-length
-        Plots: { resize(div: Plotly.PlotlyHTMLElement): void };
-        newPlot(div: HTMLDivElement, data: Plotly.Data[], layout?: Partial<Plotly.Layout>, config?: Partial<Plotly.Config>): Promise<PlotlyHTMLElement>;
-        plot(div: Plotly.PlotlyHTMLElement, data: Plotly.Data[], layout?: Partial<Plotly.Layout>, config?: Partial<Plotly.Config>): Promise<PlotlyHTMLElement>;
-        react(div: Plotly.PlotlyHTMLElement, data: Plotly.Data[], layout?: Partial<Plotly.Layout>, config?: Partial<Plotly.Config>): Promise<PlotlyHTMLElement>;
-        // tslint:enable
-    }
+export interface Figure {
+    data: _Plotly.Data[];
+    layout: Partial<_Plotly.Layout>;
+    frames: Partial<_Plotly.Config>;
 }
